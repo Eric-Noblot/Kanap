@@ -40,6 +40,7 @@ function displayProduct(product){
 
 
 
+
 //a href= "./product.html?id=${article._id}"
 // searchProduct();
 // async function searchProduct(){

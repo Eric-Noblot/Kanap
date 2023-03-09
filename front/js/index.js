@@ -17,7 +17,6 @@ try {
           <p class="productDescription">${article.description}</p>
           </article>
           </a>`;
-          console.log(article._id);
   }
 }
 catch (error) {
