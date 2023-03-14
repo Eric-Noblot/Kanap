@@ -5,7 +5,6 @@
 const idProduct = window.location.search;
 const urlParams = new URLSearchParams(idProduct);
 const id = urlParams.get("id");
-//console.log(id);
 let color = document.getElementById("colors");
 
 
@@ -23,14 +22,11 @@ function displayProduct(product) {
     if (product != null) {
         let item__img = document.querySelector(".item__img");
         item__img.innerHTML += `<img src="${product.imageUrl}" alt="Photo d'un canapé">`;
-
         let price = document.getElementById("price");
         price.innerHTML = product.price;
-
         let description = document.getElementById("description");
         description.textContent = product.description;
         
-
         for (let ColorChoice in product.colors) {
             let option = document.createElement("option");       // Boucle qui liste les différentes couleurs
             option.textContent = product.colors[ColorChoice];
@@ -47,39 +43,43 @@ function displayProduct(product) {
 //-------------------------------------------------------------
 
 color.addEventListener("change", function(){
-    console.log(color.value)
+    return color.value
 })
+
 
 //-------------------------------------------------------------
 // RÉCUPÉRATION DE LA VALUE SAISIE DANS L'INPUT QUANTITY
 //-------------------------------------------------------------
 
 let quantity = document.getElementById("quantity");
-quantity.addEventListener("keyup", function () {
-    //let quantityIput = parseInt(quantity.value)
-    if (isNumber(quantity.value)) {
-        console.log("c'est un chiffre");
-    }
-    else {
-        console.log("c'est une lettre");
+// quantity.addEventListener("change", function () {
+//     if (parseInt(quantity.value) <= 0 || parseInt(quantity.value) > 100){
+//         quantity.style.color = "red";
+//         return false
+//     } 
+//     else{
+//         quantity.style.color = "black";
+//         return true
+//     }
+// })
 
-    }
-})
+// ------------------------------------------------------------------------
+//FONCTION QUI VÉRIFIE QUE LA QUANTITÉ SAISIE EST UN NOMBRE ENTRE 1 et 100
+// ------------------------------------------------------------------------
 
-// ------------------------------------------------------------
-//FONCTION QUI VÉRIFIE QUE LA QUANTITÉ SAISIE EST UN NOMBRE
-// ------------------------------------------------------------
-
-const isNumber = function (number) {
+const isNumber = function (inputNumber) {
     let regex = /^[0-9]+$/;             
-    if (regex.test(number)) {
+    if (regex.test(inputNumber)) {
+        if (inputNumber > 0 && inputNumber <= 100){
+            console.log("La vérification est OK")
         return true;
+        }
     }
     else {
+        console.log("La vérification n'est pas bonne")
         return false;
     }
 }
-
 
 // ------------------------------------------------------------
 // GESTION D'ÉVÈNEMENT DU BOUTON AJOUTER AU PANIER
@@ -87,13 +87,16 @@ const isNumber = function (number) {
 
 let buttonCart = document.getElementById("addToCart");
 buttonCart.addEventListener("click", function () {
-    if (isNumber(quantity.value) && quantity.value > 0) {
-        alert("Vous avez choisi de commander " + quantity.value + " article(s)");
+
+    if (isNumber(parseInt(quantity.value)) && color.value != "") {
+        alert("Vous avez choisi de commander " + quantity.value + " article(s) avec la couleur : " + color.value);
         quantity.value = 0;
-    }
+        console.log(color.value + "IF1")
+        }
     else {
-        alert("Vous n'avez pas saisi la bonne quantité");
+        alert("Vous devez chosir une couleur et une quantité !");
         quantity.value = 0;
+        console.log(color.value + "ELSE1")
     }
 })
 
@@ -123,3 +126,15 @@ buttonCart.addEventListener("click", function () {
         //     color.appendChild(option);
 
             //}
+
+
+// const isNumber = function (inputQuantity) {
+//     if (Number.isNaN(parseInt(quantity.value))) {
+//         //return 'Number NaN';
+//         console.log(inputQuantity)
+//         }
+//         if (isNaN(parseInt(quantity.value))) {
+//         //return 'NaN';
+//         console.log(inputQuantity)
+//         }
+// }
