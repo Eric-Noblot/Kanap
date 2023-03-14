@@ -38,7 +38,7 @@ const textDisplay = function(product){
 
 const formValidity = function(inputForm){
   let regex = /^[a-zA-Z-_'éÉèÈêÊëËâÂäÄàÀôÔöÖ ]+$/; 
-  let error = document.querySelector("#" + inputForm.id + "ErrorMsg"); 
+  let error = document.querySelector(`#${inputForm.id}ErrorMsg`); 
   if (inputForm.value == "") {
     error.textContent = "Le champs doit être rempli";
     error.style.display = "inline";
@@ -65,6 +65,7 @@ let firstName = document.getElementById("firstName");
 firstName.addEventListener("keyup", function () {
   formValidity(firstName)
 })
+
 let lastname = document.getElementById("lastName");
 lastname.addEventListener("keyup", function () {
   formValidity(lastname)
@@ -90,6 +91,16 @@ products.forEach(function(product) {
 
 totalPrice = document.getElementById("totalPrice");
 totalPrice.innerHTML = articlePrice
+
+//----------------------------------------------------------
+// MISE EN PAGE DU FORMULAIRE ET AJOUT D'UN PADDING 
+//----------------------------------------------------------
+let cartOrder = document.querySelectorAll("div.cart__order__form__question");
+console.log(cartOrder)
+cartOrder[2].style.color = "red";
+firstName.style.paddingLeft = "10px";
+
+
 
 
 

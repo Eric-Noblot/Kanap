@@ -71,12 +71,10 @@ const isNumber = function (inputNumber) {
     let regex = /^[0-9]+$/;             
     if (regex.test(inputNumber)) {
         if (inputNumber > 0 && inputNumber <= 100){
-            console.log("La vérification est OK")
         return true;
         }
     }
     else {
-        console.log("La vérification n'est pas bonne")
         return false;
     }
 }
@@ -89,14 +87,12 @@ let buttonCart = document.getElementById("addToCart");
 buttonCart.addEventListener("click", function () {
 
     if (isNumber(parseInt(quantity.value)) && color.value != "") {
-        alert("Vous avez choisi de commander " + quantity.value + " article(s) avec la couleur : " + color.value);
+        alert(`Vous avez choisi de commander ${quantity.value} article(s) avec la couleur : ${color.value}`);
         quantity.value = 0;
-        console.log(color.value + "IF1")
         }
     else {
         alert("Vous devez chosir une couleur et une quantité !");
         quantity.value = 0;
-        console.log(color.value + "ELSE1")
     }
 })
 
