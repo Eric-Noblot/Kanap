@@ -39,8 +39,8 @@ function displayProduct(product) {
 //-------------------------------------------------------------
 // RÉCUPÉRATION DE LA VALUE SAISIE DANS L'INPUT COULEUR
 //-------------------------------------------------------------
-let color = document.getElementById("colors");
 
+let color = document.getElementById("colors");
 color.addEventListener("change", function(){
     color.style.color = "black"
     return color.value
@@ -89,23 +89,42 @@ const isNumber = function (inputNumber) {
 // ------------------------------------------------------------
 // GESTION D'ÉVÈNEMENT DU BOUTON AJOUTER AU PANIER
 // ------------------------------------------------------------
-
+//document.querySelector('#addToCart').addEventListener('click', addQuantityToCart);
 let buttonCart = document.getElementById("addToCart");
 buttonCart.addEventListener("click", function () {
 
+    let card = [];
+
     if (isNumber(parseInt(quantity.value)) && color.value != "") {
-        localStorage.setItem("color", JSON.stringify(color.value));
-        localStorage.setItem("quantity", JSON.stringify(quantity.value));
-        alert(`Vous avez choisi de commander ${quantity.value} article(s) avec la couleur : ${color.value}`);
+
+        const productInput = {
+            "id": id,
+            "name": product.name,
+            "price": parseInt(product.price),
+            "description": product.description,
+            "imageUrl": product.imageUrl,
+            "altTxt": product.altTxt,
+            "color": color.value,
+            "quantity": parseInt(quantity.value)
+        }
+        localStorage.setItem(id, JSON.stringify(productInput))
+        // const ProductInputArray = Object.keys(productInput);
+        // console.log(ProductInputArray);
+        
+        arrayProduct.push(objJson);
+
+
+
+        alert(`Vous avez ajouté ${quantity.value} ${product.name} de la couleur ${color.value} dans votre panier`);
         quantity.value = 0;
         }
     else {
         alert("Vous devez chosir une couleur et une quantité !");
-        quantity.value = 0;
     }
 })
 
 displayProduct(product);
+
 
 
 

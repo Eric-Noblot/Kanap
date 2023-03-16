@@ -2,28 +2,29 @@ const products = await(await fetch("http://localhost:3000/api/products")).json()
 
 
 //  --> Fonctions et variables globales
+let idInput = JSON.parse(localStorage.getItem("id"));
 
 
 // -------------------------------------------
 //FONCTION QUI AFFICHE LES ÉLÉMENTS DU PANIER
 // -------------------------------------------
 
-const textDisplay = function(product){
+const textDisplay = function(){
 
   let article = document.querySelector("#cart__items").innerHTML +=
   `
 <article class="cart__item" data-id="{product-ID}" data-color="{product-color}">
-<div class="cart__item__img"><img src="${product.imageUrl}" alt="Photographie d'un canapé"></div>
+<div class="cart__item__img"><img src="${idInput.imageUrl}" alt="Photographie d'un canapé"></div>
 <div class="cart__item__content">
   <div class="cart__item__content__description">
-    <h2>${product.name}</h2>
-    <p>${product.color}</p>
-    <p>${product.price} €</p>
+    <h2>${idInput.name}</h2>
+    <p>${idInput.color}</p>
+    <p>${idInput.price} €</p>
   </div>
   <div class="cart__item__content__settings">
     <div class="cart__item__content__settings__quantity">
       <p>Qté : </p>
-      <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="42">
+      <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${idInput.quantity}">
     </div>
     <div class="cart__item__content__settings__delete"><p class="deleteItem">Supprimer</p></div>
   </div>
@@ -86,11 +87,13 @@ let email = document.getElementById("email");
 let articlePrice = 0;
 products.forEach(function(product) {
   textDisplay(product);
-  articlePrice = articlePrice + product.price
+  articlePrice = idInput.quantity * product.price
 })
 
 totalPrice = document.getElementById("totalPrice");
-totalPrice.innerHTML = articlePrice
+totalPrice.innerHTML = articlePrice;
+totalQuantity = document.getElementById("totalQuantity");
+totalQuantity.innerHTML = idInput.quantity;
 
 //----------------------------------------------------------
 // MISE EN PAGE DU FORMULAIRE ET AJOUT D'UN PADDING 
@@ -100,13 +103,7 @@ totalPrice.innerHTML = articlePrice
 // cartOrder[2].style.color = "red";
 // firstName.style.paddingLeft = "10px";
 
-
-
 //  --> GESTION DU LOCALSTORAGE
 //let color = JSON.parse(localStorage.getItem("color"));
-let color = localStorage.getItem("color");
-let quantity = localStorage.getItem("quantity");
 
-console.log(color);
-console.log(quantity);
 
