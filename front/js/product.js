@@ -5,13 +5,11 @@
 const idProduct = window.location.search;
 const urlParams = new URLSearchParams(idProduct);
 const id = urlParams.get("id");
-let color = document.getElementById("colors");
 
 
 const product = await(await fetch("http://localhost:3000/api/products/" + id)).json();
 
 
-displayProduct(product);
 
 // --------------------------------
 // FONCTION QUI AFFICHE LE PRODUIT
@@ -41,8 +39,10 @@ function displayProduct(product) {
 //-------------------------------------------------------------
 // RÉCUPÉRATION DE LA VALUE SAISIE DANS L'INPUT COULEUR
 //-------------------------------------------------------------
+let color = document.getElementById("colors");
 
 color.addEventListener("change", function(){
+    color.style.color = "black"
     return color.value
 })
 
@@ -52,6 +52,13 @@ color.addEventListener("change", function(){
 //-------------------------------------------------------------
 
 let quantity = document.getElementById("quantity");
+quantity.addEventListener("change", function(){
+    quantity.style.color = "black";
+    return quantity.value
+})
+        
+       
+
 // quantity.addEventListener("change", function () {
 //     if (parseInt(quantity.value) <= 0 || parseInt(quantity.value) > 100){
 //         quantity.style.color = "red";
@@ -87,6 +94,8 @@ let buttonCart = document.getElementById("addToCart");
 buttonCart.addEventListener("click", function () {
 
     if (isNumber(parseInt(quantity.value)) && color.value != "") {
+        localStorage.setItem("color", JSON.stringify(color.value));
+        localStorage.setItem("quantity", JSON.stringify(quantity.value));
         alert(`Vous avez choisi de commander ${quantity.value} article(s) avec la couleur : ${color.value}`);
         quantity.value = 0;
         }
@@ -96,6 +105,7 @@ buttonCart.addEventListener("click", function () {
     }
 })
 
+displayProduct(product);
 
 
 

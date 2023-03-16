@@ -95,12 +95,18 @@ totalPrice.innerHTML = articlePrice
 //----------------------------------------------------------
 // MISE EN PAGE DU FORMULAIRE ET AJOUT D'UN PADDING 
 //----------------------------------------------------------
-let cartOrder = document.querySelectorAll("div.cart__order__form__question");
-console.log(cartOrder)
-cartOrder[2].style.color = "red";
-firstName.style.paddingLeft = "10px";
+// let cartOrder = document.querySelectorAll("div.cart__order__form__question");
+// console.log(cartOrder)
+// cartOrder[2].style.color = "red";
+// firstName.style.paddingLeft = "10px";
 
 
 
+//  --> GESTION DU LOCALSTORAGE
+//let color = JSON.parse(localStorage.getItem("color"));
+let color = localStorage.getItem("color");
+let quantity = localStorage.getItem("quantity");
 
+console.log(color);
+console.log(quantity);
 
