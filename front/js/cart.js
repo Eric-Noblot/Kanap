@@ -6,9 +6,8 @@ let articleInput = JSON.parse(localStorage.getItem("article"));
 
 // -------------------------------------------
 //FONCTION QUI AFFICHE LES ÉLÉMENTS DU PANIER
-// -------------------------------------------
 
-const textDisplay = function(articleInput){
+function textDisplay(articleInput){
 
   let article = document.querySelector("#cart__items").innerHTML +=
   `
@@ -34,30 +33,26 @@ console.log(articleInput.name)
 }
 
 
+// ------------------------------------------------------------
+// FONCTION QUI RECUPERE LE PRIX ET AFFICHE LE TOTAL
+
+function totalPriceAndQuantity(priceNumber){
+  totalArticlesPrice += priceNumber.price * priceNumber.quantity
+  let totalPrice = document.getElementById("totalPrice");
+  totalPrice.innerHTML = totalArticlesPrice;
+  totalArticlesQuantity += priceNumber.quantity;
+  let totalQuantity = document.getElementById("totalQuantity");
+  totalQuantity.innerHTML = totalArticlesQuantity;
+}
 
 
-//------------------------------------------------------
-// CALCUL DU PRIX TOTAL DES ARTICLES SÉLÉCTIONNÉS
-let i = 0
-articleInput.forEach(function(product) {
- // for (let i = 0; i< localStorage.length; i++){
 
-  textDisplay(articleInput[i]); 
-  i++
-})
-
-// totalPrice = document.getElementById("totalPrice");
-// totalPrice.innerHTML = articlePrice;
-// totalQuantity = document.getElementById("totalQuantity");
-// totalQuantity.innerHTML = articleInput.quantity;
-
-
-//--------------FORMULAIRE-------------------
+                //------>  FORMULAIRE  <-----------
 
 // ------------------------------------------------------------
 // FONCTION QUI VALIDE LES CHAMPS DE SAISIE DU FORMULAIRE
 
-const formValidity = function(inputForm){
+function formValidity(inputForm){
   let regex = /^[a-zA-Z-_'éÉèÈêÊëËâÂäÄàÀôÔöÖ ]+$/; 
   let error = document.querySelector(`#${inputForm.id}ErrorMsg`); 
   if (inputForm.value == "") {
@@ -73,6 +68,18 @@ const formValidity = function(inputForm){
     error.style.display = "none";
   }
 }
+
+//----------------------------------------------------------
+// AFFICHAGE DES ARTICLES COMMANDÉS + CALCUL TOTAL 
+
+let i = 0
+let totalArticlesPrice = 0;
+let totalArticlesQuantity = 0;
+articleInput.forEach(function() {
+  textDisplay(articleInput[i]);
+  totalPriceAndQuantity(articleInput[i]);
+  i++
+})
 
 //------------------------------------------------------
 //VÉRIFICATION LORS DE LA SAISIE DU PRÉNOM, NOM ET VILLE
@@ -96,15 +103,15 @@ let email = document.getElementById("email");
 
 
 
-//----------------------------------------------------------
-// MISE EN PAGE DU FORMULAIRE ET AJOUT D'UN PADDING 
 
-// let cartOrder = document.querySelectorAll("div.cart__order__form__question");
+
+
+
+
+// //--------------------------------------------------------
+// //MISE EN PAGE DU FORMULAIRE ET AJOUT D'UN PADDING 
+
+// let cartOrder = document.querySelectorAll("cart__order__form__question");
 // console.log(cartOrder)
-// cartOrder[2].style.color = "red";
+// cartOrder.style.color = "red";
 // firstName.style.paddingLeft = "10px";
-
-//  --> GESTION DU LOCALSTORAGE
-//let color = JSON.parse(localStorage.getItem("color"));
-
-
