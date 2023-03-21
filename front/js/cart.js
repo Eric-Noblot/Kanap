@@ -149,24 +149,24 @@ const deleteArticle = document.querySelectorAll(".cart__item__content__settings_
 deleteArticle.forEach(function(element){
     element.style.color = "red"
     element.addEventListener("click", function(){
-
-      if (confirm("Êtes-vous sûr de vouloir supprimer?")){
-        let article = getCart();
-        console.log("article ", article)
-        removeFromCart({id:"034707184e8e4eefb46400b5a3774b5f"})
-        location.reload()
-      }
-    })
+      
+    if (confirm("Êtes-vous sûr de vouloir supprimer?")){
+      let article = getCart();
+      removeFromCart({id:"107fb5b75607497b96722bda5b504926"})
+      location.reload()
+    }
   })
+})
 
 // })
 
-// ;----------------------------------------------------------
+// ;--------------------------------------    --------------------
 //FONCTION QUI SUPPRIME UN ARTICLE DU LOCAL STORAGE
 
 function removeFromCart(product){
   let article = getCart();
   article = article.filter(function(element){
+    
     return element.id != product.id
   })
   updateCart(article);
