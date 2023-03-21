@@ -9,6 +9,10 @@ const id = urlParams.get("id");
 
 const product = await(await fetch("http://localhost:3000/api/products/" + id)).json();
 
+const quantityInput = document.getElementById("quantity");
+const colorInput = document.getElementById("colors"); 
+const buttonCart = document.getElementById("addToCart");
+let isValid;
 
 // --------------------------------
 // FONCTION QUI AFFICHE LE PRODUIT
@@ -23,78 +27,43 @@ function displayProduct(product){
         let description = document.getElementById("description");
         description.textContent = product.description;
         
-        for (let ColorChoice in product.colors) {
+        for (let color in product.colors) {
             let option = document.createElement("option");       // Boucle qui liste les différentes couleurs
-            option.textContent = product.colors[ColorChoice];
-            color.appendChild(option);
+            option.textContent = product.colors[color];
+            colorInput.appendChild(option);
         }
     }
     else {
         console.log("Erreur dans la récupération du produit");
     }
 }
-    
-
-//-------------------------------------------------------------
-// RÉCUPÉRATION DE LA VALUE SAISIE DANS L'INPUT COULEUR
-//-------------------------------------------------------------
-
-let color = document.getElementById("colors");
-// color.addEventListener("change", function(){
-//     color.style.color = "black"
-//     return color.value
-// }) 
-
-
-//-------------------------------------------------------------
-// RÉCUPÉRATION DE LA VALUE SAISIE DANS L'INPUT QUANTITY
-//-------------------------------------------------------------
-
-let quantityInput = document.getElementById("quantity");
-quantityInput.addEventListener("change", function(){
-    // QuantityValue = quantityInput.value
-    // return QuantityValue
-})
-
-
-// ------------------------------------------------------------------------
-//FONCTION QUI VÉRIFIE QUE LA QUANTITÉ SAISIE EST UN NOMBRE ENTRE 1 et 100
-// ------------------------------------------------------------------------
-
-function isNumber (inputNumber) {
-    let regex = /^[0-9]+$/;             
-    if (regex.test(inputNumber)) {
-        if (inputNumber > 0 && inputNumber <= 100){
-        return true;
-        }
-    }
-    else {
-        return false;
-    }
-}
 
 // ;----------------------------------------------------------
 //FONCTION QUI CHECK QUEL CHAMPS A ÉTÉ MAL RENSEIGNÉ
 
-function checkValidity(inputColor, inputQuantity){
-    if (inputColor == ""){
+function checkValidity(color, quantity){
+    isValid = true
+    if (color == ""){
         const borderColor = document.getElementById("colors");
         borderColor.style.border = "2px solid red";
         alert("Vous devez sélectionner une couleur !");
+        isValid = false;
     }
     else {
         const borderColor = document.getElementById("colors");
         borderColor.style.border = "none";
     }
-    if (inputQuantity <= 0 || inputQuantity > 100){
+    if (quantity <= 0 || quantity > 100){
         const borderColor = document.getElementById("quantity");
         borderColor.style.border = "2px solid red";
         alert("Vous devez chosir une quantité entre 1 et 100!");
+        isValid = false;
     }
     else {
         const borderColor = document.getElementById("quantity");
         borderColor.style.border = "none";
     }
+    return isValid
 }
 
 
@@ -102,81 +71,52 @@ function checkValidity(inputColor, inputQuantity){
 
 
 // ;-------------------------------------------------------
-//FONCTION QUI AJOUTE L'ARTICLE AU LOCAL STORAGE
+//FONCTION QUI CRÉE / MET À JOUR LE LOCAL STORAGE
 
-function addArticle(article){
+function updateCart(article){
     localStorage.setItem("article", JSON.stringify(article)); 
 }
 
 // ;-------------------------------------------------------
-//FONCTION QUI RECUPERE l'ARTICLE DANS LE STORAGE
+//FONCTION QUI RENVOIE LE PANIER 
 
-function getArticle(){
+function getCart(){
     let article = localStorage.getItem("article");
     if(article == null){
         return [];
     }
     else{
-    return JSON.parse(article);
+    return JSON.parse(article);  
     }
 }
 
 // ;----------------------------------------------------------
-//FONCTION QUI CHECK SI LE PRODUIT EXISTE DEJA DANS LE STORAGE
+//CHECK SI LE PRODUIT EXISTE DEJA DANS LE STORAGE
 
-function addProduct(product){
-    let article = getArticle();
-    let foundIdProduct = article.find(function(element){
-        return element.id == product.id;
+function checkProductStorage(product){
+    let article = getCart();
+    let foundProduct = article.find(function(element){
+        return element.id == product.id && element.color == product.color;
     });
 
-    let foundColorProduct = article.find(function(element){
-        return element.color == product.color;
-    });
-
-    if (foundIdProduct != undefined && foundColorProduct != undefined){     // si le produit ET la couleur exite déjà dans le panier
-        console.log("foundColorProduct" + foundColorProduct)  ;       
-        let productQuantity;
-        productQuantity = parseInt(quantity.value) + product.quantity;
-        console.log("il y avait déjà un produit");
-        console.log("quantité tapée: " + quantity.value);
-        console.log("quantité dans le Local: " + product.quantity);
-        console.log("quantité après addition:" + productQuantity);
-
+    if (foundProduct){    
+        foundProduct.quantity = parseInt(quantity.value) + foundProduct.quantity;
     }
     else {                      
         article.push(product);
-        console.log("foundColorProduct" + foundColorProduct)   ;  
-        console.log("il n'y a pas de quantité trouvée, on push");
-        console.log("quantité tapée: " + quantity.value);
-        console.log("quantité dans le Local: " + product.quantity);
     }
-    addArticle(article);
+    updateCart(article);
 }
-
-// ;----------------------------------------------------------
-//FONCTION QUI SUPPRIME UN ARTICLE DU LOCAL STORAGE
-
-function removeFromBasket(product){
-    let article = getArticle();
-    article = article.filter(function(element){
-        return element.id != product.id;
-    })
-    addArticle(article);
-}
-//removeFromBasket({id:"107fb5b75607497b96722bda5b504926"})
-
-
 
 
 // ;----------------------------------------------------------
 //EVENT LISTENER SUR LE CLICK DU BOUTON COMMANDER
 
 //document.querySelector('#addToCart').addEventListener('click', addQuantityToCart);
-let buttonCart = document.getElementById("addToCart");
+
 buttonCart.addEventListener("click", function () {
 
-    if (isNumber(parseInt(quantityInput.value)) && color.value != "") {
+    if (checkValidity(colorInput.value, quantityInput.value)) {
 
         const productInput = {
             "id": product._id,
@@ -185,22 +125,20 @@ buttonCart.addEventListener("click", function () {
             "description": product.description,
             "imageUrl": product.imageUrl,
             "altTxt": product.altTxt,
-            "color": color.value,
+            "color": colorInput.value,
             "quantity": parseInt(quantityInput.value)
         }
 
-        addProduct(productInput);
-        alert(`Vous avez ajouté ${quantityInput.value} ${product.name} de la couleur ${color.value} dans votre panier`);
+        checkProductStorage(productInput);
+        alert(`Vous avez ajouté ${quantityInput.value} ${product.name} de la couleur ${colorInput.value} dans votre panier`);
 
-        checkValidity(color.value, quantityInput.value);
         quantityInput.value = 0;    
-        color.value = "";
+        colorInput.value = "";
      }
-     else{
-        checkValidity(color.value, quantityInput.value);
-     }
+
 })
 
 
 
-displayProduct(product);
+displayProduct(product); //j'aimerais mettre ca au début dans un test avec fecth qui renvoie cette fonction si la réponse est ok 
+                        // puis je mettre un amway ou async avant pour mettre cettet fonction dès le début et attendre avant d'afficher?       

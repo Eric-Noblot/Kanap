@@ -2,46 +2,53 @@
 
 
 //  --> Fonctions et variables globales
-let articleInput = JSON.parse(localStorage.getItem("article"));
+let article = JSON.parse(localStorage.getItem("article"));
+
+let i = 0
+let totalArticlesPrice = 0;
+let totalArticlesQuantity = 0;
 
 // -------------------------------------------
 //FONCTION QUI AFFICHE LES ÉLÉMENTS DU PANIER
 
-function textDisplay(articleInput){
+function textDisplay(article){
 
-  let article = document.querySelector("#cart__items").innerHTML +=
+  article = document.querySelector("#cart__items").innerHTML +=
   `
 <article class="cart__item" data-id="{product-ID}" data-color="{product-color}">
-<div class="cart__item__img"><img src="${articleInput.imageUrl}" alt="Photographie d'un canapé"></div>
+<div class="cart__item__img"><img src="${article.imageUrl}" alt="Photographie d'un canapé"></div>
 <div class="cart__item__content">
   <div class="cart__item__content__description">
-    <h2>${articleInput.name}</h2>
-    <p>${articleInput.color}</p>
-    <p>${articleInput.price} €</p>
+    <h2>${article.name}</h2>
+    <p>${article.color}</p>
+    <p>${article.price} €</p>
   </div>
   <div class="cart__item__content__settings">
     <div class="cart__item__content__settings__quantity">
       <p>Qté : </p>
-      <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${articleInput.quantity}">
+      <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${article.quantity}">
     </div>
     <div class="cart__item__content__settings__delete"><p class="deleteItem">Supprimer</p></div>
   </div>
 </div>
 </article>
 `
-console.log(articleInput.name)
+
 }
+
 
 
 // ------------------------------------------------------------
 // FONCTION QUI RECUPERE LE PRIX ET AFFICHE LE TOTAL
 
 function totalPriceAndQuantity(priceNumber){
-  totalArticlesPrice += priceNumber.price * priceNumber.quantity
   let totalPrice = document.getElementById("totalPrice");
-  totalPrice.innerHTML = totalArticlesPrice;
-  totalArticlesQuantity += priceNumber.quantity;
   let totalQuantity = document.getElementById("totalQuantity");
+
+  totalArticlesPrice += priceNumber.price * priceNumber.quantity
+  totalPrice.innerHTML = totalArticlesPrice;
+
+  totalArticlesQuantity += priceNumber.quantity;
   totalQuantity.innerHTML = totalArticlesQuantity;
 }
 
@@ -72,12 +79,9 @@ function formValidity(inputForm){
 //----------------------------------------------------------
 // AFFICHAGE DES ARTICLES COMMANDÉS + CALCUL TOTAL 
 
-let i = 0
-let totalArticlesPrice = 0;
-let totalArticlesQuantity = 0;
-articleInput.forEach(function() {
-  textDisplay(articleInput[i]);
-  totalPriceAndQuantity(articleInput[i]);
+article.forEach(function() {
+  textDisplay(article[i]);
+  totalPriceAndQuantity(article[i]);
   i++
 })
 
@@ -102,10 +106,79 @@ let address = document.getElementById("address");
 let email = document.getElementById("email");
 
 
+// ------------------------------------------------------------------------
+//FONCTION QUI VÉRIFIE QUE LA QUANTITÉ SAISIE EST UN NOMBRE ENTRE 1 et 100
+// ------------------------------------------------------------------------
+
+function isValidNumber (number) {
+  let regex = /^[0-9]+$/;             
+  if (regex.test(number)) {
+      if (number > 0 && number <= 100){
+      return true;
+      }
+  }
+  else {
+      return false;
+  }
+}
+
+// ;-------------------------------------------------------
+//FONCTION QUI CRÉE / MET À JOUR LE LOCAL STORAGE
+
+function updateCart(article){
+  localStorage.setItem("article", JSON.stringify(article)); 
+}
+
+// ;-------------------------------------------------------
+//FONCTION QUI RENVOIE LE PANIER 
+
+function getCart(){
+  let article = localStorage.getItem("article");
+  if(article == null){
+      return [];
+  }
+  else{
+  return JSON.parse(article);  
+  }
+}
+
+// ;----------------------------------------------------------
+//EVENT LISTENER SUR LE CLICK DU BOUTON SUPPRIMER
+
+const deleteArticle = document.querySelectorAll(".cart__item__content__settings__delete");
+deleteArticle.forEach(function(element){
+    element.style.color = "red"
+    element.addEventListener("click", function(){
+
+      if (confirm("Êtes-vous sûr de vouloir supprimer?")){
+        let article = getCart();
+        console.log("article ", article)
+        removeFromCart({id:"034707184e8e4eefb46400b5a3774b5f"})
+        location.reload()
+      }
+    })
+  })
+
+// })
+
+// ;----------------------------------------------------------
+//FONCTION QUI SUPPRIME UN ARTICLE DU LOCAL STORAGE
+
+function removeFromCart(product){
+  let article = getCart();
+  article = article.filter(function(element){
+    return element.id != product.id
+  })
+  updateCart(article);
+}
 
 
+//removeFromBasket()
 
 
+// const r1 = article.closest("div");
+// console.log(r1)
+// // Renvoie l'élément avec l'identifiant div-02
 
 
 // //--------------------------------------------------------
