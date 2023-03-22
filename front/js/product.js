@@ -39,7 +39,7 @@ function displayProduct(product){
 }
 
 // ;----------------------------------------------------------
-//FONCTION QUI CHECK QUEL CHAMPS A ÉTÉ MAL RENSEIGNÉ
+//VÉRIFIE LA VALIDITÉ DES CHAMPTS ET QUEL CHAMPS EST MAL RENSEIGNÉ
 
 function checkValidity(color, quantity){
     isValid = true
