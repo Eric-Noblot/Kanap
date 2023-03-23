@@ -12,7 +12,7 @@ const product = await(await fetch("http://localhost:3000/api/products/" + id)).j
 const quantityInput = document.getElementById("quantity");
 const colorInput = document.getElementById("colors"); 
 const buttonCart = document.getElementById("addToCart");
-let isValid;
+
 
 // --------------------------------
 // FONCTION QUI AFFICHE LE PRODUIT
@@ -41,6 +41,7 @@ function displayProduct(product){
 // ;----------------------------------------------------------
 //VÉRIFIE LA VALIDITÉ DES CHAMPTS ET QUEL CHAMPS EST MAL RENSEIGNÉ
 
+let isValid;
 function checkValidity(color, quantity){
     isValid = true
     if (color == ""){
@@ -71,14 +72,14 @@ function checkValidity(color, quantity){
 
 
 // ;-------------------------------------------------------
-//FONCTION QUI CRÉE / MET À JOUR LE LOCAL STORAGE
+// MET À JOUR LE LOCAL STORAGE
 
 function updateCart(article){
     localStorage.setItem("article", JSON.stringify(article)); 
 }
 
 // ;-------------------------------------------------------
-//FONCTION QUI RENVOIE LE PANIER 
+//FONCTION QUI RECUPÉRE LA CLÉ "ARTICLE" DU LOCAL
 
 function getCart(){
     let article = localStorage.getItem("article");
@@ -101,6 +102,10 @@ function checkProductStorage(product){
 
     if (foundProduct){    
         foundProduct.quantity = parseInt(quantity.value) + foundProduct.quantity;
+        if (foundProduct.quantity > 100){
+            alert("Vous ne pouvez pas dépasser la quantité de 100");
+            foundProduct.quantity = 100;        //j'aimerais sauter l'étape du else
+        }
     }
     else {                      
         article.push(product);
