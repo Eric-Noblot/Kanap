@@ -40,7 +40,7 @@ email = document.querySelector("#email").style.paddingLeft = "10px";
 //  VALIDE LES CHAMPS DE SAISIE DU FORMULAIRE
 
 function formValidity(inputForm) {
-  const regex = /^[a-zA-Z-_'éÉèÈêÊëËâÂäÄàÀôÔöÖ ]+$/;
+  const regex = /^[a-zA-Z-_'àèìòùÀÈÌÒÙáéíóúÁÉÍÓÚâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜŸçÇ ]+$/;
   if (inputForm == "") {
     return false
 
@@ -56,8 +56,11 @@ function formValidity(inputForm) {
 //  VALIDE LES CHAMPS DE SAISIE DE L'ADRESSE POSTALE
 
 function addressValidity(address) {
-
+  const regex = /^[a-zA-Z0-9\s,.'-]{3,}$/; // accepte 3 caractères minimum
   if (address == "") {
+    return false
+
+  } else if (regex.test(address) === false) {
     return false
   }
   else {
@@ -207,24 +210,50 @@ orderBtn.addEventListener('click', function (element) {
     alert("Veuillez complétez tous les champs du formulaire")
   }
 
-  //ICI 
+  // // ------------------------------------------------------------
+  // MÉTHODE POST POUR ENVOYER LA COMMANDE ET LE FORMULAIRE 
+
+  var orderId = "";  // Variable qui récupère l'orderId envoyé comme réponse par le serveur lors de la requête POST :
 
 
+  function sendFromToServer() {
 
+    fetch("http://localhost:3000/api/products/order", {
+      method: "POST",
+      body: JSON.stringify({ contact, articles }), //??? article?
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+
+    // on stock la réponse de l'api (orderId) :
+    .then((response) => {
+      return response.json();
+    })
+
+    .then((server) => {
+      orderId = server.orderId;
+
+      if (orderId != "") {
+        alert("Votre commande a bien été prise en compte");
+        console.log("orderId", orderId);
+        console.log("server.orderId", server.orderId);
+        //location.href = "confirmation.html?id=" + orderId;
+      }
+    })
+  }
 })    //fin du listener COMMANDER
 
-//ICI
 
-
- //       -----------------> Affichage de la page   <----------------------
+//       -----------------> Affichage de la page   <----------------------
 
 
 // -------------------------------------------
 // AFFICHE LES ÉLÉMENTS DU PANIER
 
 function textDisplay(articles) {
-let articlePrice = 0;
-articlePrice = articles.price * articles.quantity
+  let articlePrice = 0;
+  articlePrice = articles.price * articles.quantity
 
   articles = document.querySelector("#cart__items").innerHTML +=
     `
@@ -287,15 +316,15 @@ function getCart() {
 const removeArticle = document.querySelectorAll(".deleteItem");
 
 for (let i = 0; i < removeArticle.length; i++) {
-  removeArticle[i].addEventListener("click", function () {
+  removeArticle[i].addEventListener("submit", function () {
 
     let articles = getCart();
 
-    if (confirm("Êtes-vous sûr de vouloir supprimer?")){
-       localStorage.setItem('itemList', JSON.stringify(i)); // On crée une clé dans le Local pour sauvegarder l'index à supprimer
-       removeFromCart(articles)
+    if (confirm("Êtes-vous sûr de vouloir supprimer?")) {
+      localStorage.setItem('itemList', JSON.stringify(i)); // On crée une clé dans le Local pour sauvegarder l'index à supprimer
+      removeFromCart(articles)
     }
-    
+
     location.reload()
   })
 }
@@ -306,13 +335,13 @@ for (let i = 0; i < removeArticle.length; i++) {
 function removeFromCart(articles) {
   let indexArticleToRemove = localStorage.getItem("itemList");
 
-  articles.splice(indexArticleToRemove , 1)
+  articles.splice(indexArticleToRemove, 1)
   updateCart(articles);
 
   localStorage.removeItem("itemList")
 
-  if (articles == ""){
-    localStorage.removeItem("article") 
+  if (articles == "") {
+    localStorage.removeItem("article")
   }
 }
 
@@ -320,13 +349,13 @@ function removeFromCart(articles) {
 //EVENT LISTENER SUR LE CHANGEMENT DE QUANTITÉ
 
 const changeQuantity = document.querySelectorAll(".itemQuantity")
-for (let i = 0; i < changeQuantity.length; i++){
+for (let i = 0; i < changeQuantity.length; i++) {
 
-  changeQuantity[i].addEventListener("change", function(){
+  changeQuantity[i].addEventListener("change", function () {
     let articles = getCart();
     articles[i].quantity = Number(changeQuantity[i].value)
 
-    if (articles[i].quantity < 0 || articles[i].quantity > 100){
+    if (articles[i].quantity < 0 || articles[i].quantity > 100) {
       alert("Vous devez saisir une quantité entre 1 et 100")
       articles[i].quantity = 0;
     }
@@ -336,3 +365,4 @@ for (let i = 0; i < changeQuantity.length; i++){
   })
 
 }
+
