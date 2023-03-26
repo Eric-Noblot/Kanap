@@ -84,6 +84,148 @@ function emailValidity(email) {
   }
 }
 
+
+//       -----------------> Affichage de la page   <----------------------
+
+
+//----------------------------------------------------------
+// CLASSE LA LISTE DES ARTICLES PAR ORDRE ALPHABÉTIQUE 
+
+function articleSort() {
+  articles.sort(function (a, b) {
+    if (a.name.toLowerCase() < b.name.toLowerCase()) {
+      return -1
+    }
+    if (a.name.toLowerCase() > b.name.toLowerCase()) {
+      return 1
+    }
+    return 0
+  })
+}
+
+// -------------------------------------------
+// AFFICHE LES ÉLÉMENTS DU PANIER
+
+function textDisplay(articles) {
+
+  let articlePrice = 0;
+  articlePrice = articles.price * articles.quantity
+
+  articles = document.querySelector("#cart__items").innerHTML +=
+    `
+<article class="cart__item" data-id="${articles.id}" data-color="${articles.color}">
+<div class="cart__item__img"><img src="${articles.imageUrl}" alt="Photographie d'un canapé"></div>
+<div class="cart__item__content">
+  <div class="cart__item__content__description">
+    <h2>${articles.name}</h2>
+    <p>${articles.color}</p>
+    <p>${articlePrice} €</p>
+  </div>
+  <div class="cart__item__content__settings">
+    <div class="cart__item__content__settings__quantity">
+      <p>Qté : </p>
+      <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${articles.quantity}">
+    </div>
+    <div class="cart__item__content__settings__delete"><p class="deleteItem">Supprimer</p></div>
+  </div>
+</div>
+</article>
+`
+}
+
+//----------------------------------------------------------
+// AFFICHAGE DES ARTICLES COMMANDÉS + CALCUL TOTAL 
+let index = 0;
+articleSort(articles);                //classe les articles par ordre alphabétique
+updateCart(articles);               // met à jour le local Storage par ordre alpha
+articles.forEach(function () {
+  textDisplay(articles[index]);
+  totalPriceAndQuantity(articles[index]);
+  index++
+})
+
+
+//       -----------------> Gestion du LocalStorage <-------------------
+
+
+// ;-------------------------------------------------------
+// MET À JOUR LE LOCAL STORAGE
+
+function updateCart(articles) {
+  localStorage.setItem("article", JSON.stringify(articles));
+}
+
+// ;-------------------------------------------------------
+//FONCTION QUI RECUPÉRE LA CLÉ "ARTICLE" DU LOCAL
+
+function getCart() {
+  let articles = localStorage.getItem("article");
+  if (articles == null) {
+    return [];
+  }
+  else {
+    return JSON.parse(articles);
+  }
+}
+
+// ;----------------------------------------------------------
+//EVENT LISTENER SUR LE CLICK DU BOUTON SUPPRIMER
+
+const removeArticle = document.querySelectorAll(".deleteItem");
+
+for (let i = 0; i < removeArticle.length; i++) {
+  removeArticle[i].addEventListener("click", function () {
+
+    let articles = getCart();
+
+    if (confirm("Êtes-vous sûr de vouloir supprimer?")) {
+      localStorage.setItem('itemList', JSON.stringify(i)); // On crée une clé dans le Local pour sauvegarder l'index à supprimer
+      removeFromCart(articles)
+    }
+
+    location.reload()
+  })
+}
+
+// ;----------------------------------------------------------
+// SUPPRIME UN ARTICLE DU LOCAL STORAGE
+
+function removeFromCart(articles) {
+
+  let indexArticleToRemove = localStorage.getItem("itemList");
+
+  articles.splice(indexArticleToRemove, 1)
+  updateCart(articles);
+
+  localStorage.removeItem("itemList")
+
+  if (articles == "") {
+    localStorage.removeItem("article")
+  }
+}
+
+// ;----------------------------------------------------------
+//EVENT LISTENER SUR LE CHANGEMENT DE QUANTITÉ
+
+const changeQuantity = document.querySelectorAll(".itemQuantity")
+for (let i = 0; i < changeQuantity.length; i++) {
+
+  changeQuantity[i].addEventListener("change", function () {
+    let articles = getCart();
+    articles[i].quantity = Number(changeQuantity[i].value)
+
+    if (articles[i].quantity < 0 || articles[i].quantity > 100) {
+      alert("Vous devez saisir une quantité entre 1 et 100")
+      articles[i].quantity = 0;
+    }
+    updateCart(articles)
+    //totalPriceAndQuantity(articles[i])
+    location.reload()
+  })
+
+}
+
+
 // // ------------------------------------------------------------
 // EVENT LISTENER CLICK BOUTON COMMANDER 
 
@@ -213,156 +355,38 @@ orderBtn.addEventListener('click', function (element) {
   // // ------------------------------------------------------------
   // MÉTHODE POST POUR ENVOYER LA COMMANDE ET LE FORMULAIRE 
 
-  var orderId = "";  // Variable qui récupère l'orderId envoyé comme réponse par le serveur lors de la requête POST :
-
+  const orderId = "";
 
   function sendFromToServer() {
 
-    fetch("http://localhost:3000/api/products/order", {
+    const promiseOrder = fetch("http://localhost:3000/api/products/order", {
       method: "POST",
-      body: JSON.stringify({ contact, articles }), //??? article?
+      body: JSON.stringify({ contact, articles }),
       headers: {
         "Content-Type": "application/json",
       },
     })
 
-    // on stock la réponse de l'api (orderId) :
-    .then((response) => {
-      return response.json();
+    promiseOrder.then(async (response) => {
+      try {
+        const contenu = await response.json()
+        console.log("contenu", contenu);
+      } catch (error) {
+        console.log(error)
+      }
     })
 
-    .then((server) => {
-      orderId = server.orderId;
+    .then((data) => {
+      orderId = data.orderId;
 
       if (orderId != "") {
         alert("Votre commande a bien été prise en compte");
-        console.log("orderId", orderId);
-        console.log("server.orderId", server.orderId);
-        //location.href = "confirmation.html?id=" + orderId;
+        console.log("contact", contact);
+        console.log("articles", articles);
+        console.log("contenu", contenu);
+        console.log("data", data);
+        location.href = "confirmation.html?id=" + orderId;
       }
     })
   }
 })    //fin du listener COMMANDER
-
-
-//       -----------------> Affichage de la page   <----------------------
-
-
-// -------------------------------------------
-// AFFICHE LES ÉLÉMENTS DU PANIER
-
-function textDisplay(articles) {
-  let articlePrice = 0;
-  articlePrice = articles.price * articles.quantity
-
-  articles = document.querySelector("#cart__items").innerHTML +=
-    `
-<article class="cart__item" data-id="${articles.id}" data-color="${articles.color}">
-<div class="cart__item__img"><img src="${articles.imageUrl}" alt="Photographie d'un canapé"></div>
-<div class="cart__item__content">
-  <div class="cart__item__content__description">
-    <h2>${articles.name}</h2>
-    <p>${articles.color}</p>
-    <p>${articlePrice} €</p>
-  </div>
-  <div class="cart__item__content__settings">
-    <div class="cart__item__content__settings__quantity">
-      <p>Qté : </p>
-      <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${articles.quantity}">
-    </div>
-    <div class="cart__item__content__settings__delete"><p class="deleteItem">Supprimer</p></div>
-  </div>
-</div>
-</article>
-`
-}
-
-//----------------------------------------------------------
-// AFFICHAGE DES ARTICLES COMMANDÉS + CALCUL TOTAL 
-let index = 0
-articles.forEach(function () {
-  textDisplay(articles[index]);
-  totalPriceAndQuantity(articles[index]);
-  index++
-})
-
-
-//       -----------------> Gestion du LocalStorage <-------------------
-
-
-// ;-------------------------------------------------------
-// MET À JOUR LE LOCAL STORAGE
-
-function updateCart(articles) {
-  localStorage.setItem("article", JSON.stringify(articles));
-}
-
-// ;-------------------------------------------------------
-//FONCTION QUI RECUPÉRE LA CLÉ "ARTICLE" DU LOCAL
-
-function getCart() {
-  let articles = localStorage.getItem("article");
-  if (articles == null) {
-    return [];
-  }
-  else {
-    return JSON.parse(articles);
-  }
-}
-
-// ;----------------------------------------------------------
-//EVENT LISTENER SUR LE CLICK DU BOUTON SUPPRIMER
-
-const removeArticle = document.querySelectorAll(".deleteItem");
-
-for (let i = 0; i < removeArticle.length; i++) {
-  removeArticle[i].addEventListener("submit", function () {
-
-    let articles = getCart();
-
-    if (confirm("Êtes-vous sûr de vouloir supprimer?")) {
-      localStorage.setItem('itemList', JSON.stringify(i)); // On crée une clé dans le Local pour sauvegarder l'index à supprimer
-      removeFromCart(articles)
-    }
-
-    location.reload()
-  })
-}
-
-// ;----------------------------------------------------------
-// SUPPRIME UN ARTICLE DU LOCAL STORAGE
-
-function removeFromCart(articles) {
-  let indexArticleToRemove = localStorage.getItem("itemList");
-
-  articles.splice(indexArticleToRemove, 1)
-  updateCart(articles);
-
-  localStorage.removeItem("itemList")
-
-  if (articles == "") {
-    localStorage.removeItem("article")
-  }
-}
-
-// ;----------------------------------------------------------
-//EVENT LISTENER SUR LE CHANGEMENT DE QUANTITÉ
-
-const changeQuantity = document.querySelectorAll(".itemQuantity")
-for (let i = 0; i < changeQuantity.length; i++) {
-
-  changeQuantity[i].addEventListener("change", function () {
-    let articles = getCart();
-    articles[i].quantity = Number(changeQuantity[i].value)
-
-    if (articles[i].quantity < 0 || articles[i].quantity > 100) {
-      alert("Vous devez saisir une quantité entre 1 et 100")
-      articles[i].quantity = 0;
-    }
-    updateCart(articles)
-    //totalPriceAndQuantity(articles[i])
-    location.reload()
-  })
-
-}
-

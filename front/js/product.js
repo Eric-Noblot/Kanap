@@ -15,9 +15,8 @@ const buttonCart = document.getElementById("addToCart");
 
 
 // --------------------------------
-// FONCTION QUI AFFICHE LE PRODUIT
+//  AFFICHAGE LE PRODUIT
 // --------------------------------
-function displayProduct(product){
 
     if (product != null) {
         let item__img = document.querySelector(".item__img");
@@ -36,7 +35,7 @@ function displayProduct(product){
     else {
         console.log("Erreur dans la récupération du produit");
     }
-}
+
 
 // ;----------------------------------------------------------
 //VÉRIFIE LA VALIDITÉ DES CHAMPTS ET QUEL CHAMPS EST MAL RENSEIGNÉ
@@ -103,8 +102,7 @@ function checkProductStorage(product){
     if (foundProduct){    
         foundProduct.quantity = parseInt(quantity.value) + foundProduct.quantity;
         if (foundProduct.quantity > 100){
-            alert("Vous ne pouvez pas dépasser la quantité de 100");
-            foundProduct.quantity = 100;        //j'aimerais sauter l'étape du else
+            foundProduct.quantity = 100;
         }
     }
     else {                      
@@ -143,7 +141,4 @@ buttonCart.addEventListener("click", function () {
 
 })
 
-
-
-displayProduct(product); //j'aimerais mettre ca au début dans un test avec fecth qui renvoie cette fonction si la réponse est ok 
-                        // puis je mettre un amway ou async avant pour mettre cettet fonction dès le début et attendre avant d'afficher?       
+     
