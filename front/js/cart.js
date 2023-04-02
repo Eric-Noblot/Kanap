@@ -2,8 +2,12 @@
 
 
 //  --> Fonctions et variables globales
-const articles = JSON.parse(localStorage.getItem("article"));
 
+let articles = getCart();
+const totalPrice = document.getElementById("totalPrice");
+const totalQuantity = document.getElementById("totalQuantity");
+const cartItems = document.querySelector("#cart__items")
+const cartPrice = document.querySelector(".cart__price")
 
 let totalArticlesPrice = 0;
 let totalArticlesQuantity = 0;
@@ -12,14 +16,12 @@ let totalArticlesQuantity = 0;
 // ------------------------------------------------------------
 // RECUPÈRE LE PRIX ET AFFICHE LE TOTAL
 
-function totalPriceAndQuantity(articles) {
-  const totalPrice = document.getElementById("totalPrice");
-  const totalQuantity = document.getElementById("totalQuantity");
+function totalPriceAndQuantity(article) {
 
-  totalArticlesPrice += articles.price * articles.quantity
+  totalArticlesPrice += article.price * article.quantity
   totalPrice.innerHTML = totalArticlesPrice;
 
-  totalArticlesQuantity += articles.quantity;
+  totalArticlesQuantity += article.quantity;
   totalQuantity.innerHTML = totalArticlesQuantity;
 }
 
@@ -39,7 +41,7 @@ email = document.querySelector("#email").style.paddingLeft = "10px";
 // ------------------------------------------------------------
 //  VALIDE LES CHAMPS DE SAISIE DU FORMULAIRE
 
-function formValidity(inputForm) {
+function stringValidity(inputForm) {
   const regex = /^[a-zA-Z-_'àèìòùÀÈÌÒÙáéíóúÁÉÍÓÚâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜŸçÇ ]+$/;
   if (inputForm == "") {
     return false
@@ -84,12 +86,10 @@ function emailValidity(email) {
   }
 }
 
-
 //       -----------------> Affichage de la page   <----------------------
 
-
 //----------------------------------------------------------
-// CLASSE LA LISTE DES ARTICLES PAR ORDRE ALPHABÉTIQUE 
+// REGROUPE LES ARTICLES PAR NOM ET PAR COULEUR DANS LE PANIER
 
 function articleSort() {
   articles.sort(function (a, b) {
@@ -106,25 +106,24 @@ function articleSort() {
 // -------------------------------------------
 // AFFICHE LES ÉLÉMENTS DU PANIER
 
-function textDisplay(articles) {
-
+function textDisplay(article) {
   let articlePrice = 0;
-  articlePrice = articles.price * articles.quantity
+  articlePrice = article.price * article.quantity
 
-  articles = document.querySelector("#cart__items").innerHTML +=
+  cartItems.innerHTML +=
     `
-<article class="cart__item" data-id="${articles.id}" data-color="${articles.color}">
-<div class="cart__item__img"><img src="${articles.imageUrl}" alt="Photographie d'un canapé"></div>
+<article class="cart__item" data-id="${article.id}" data-color="${article.color}">
+<div class="cart__item__img"><img src="${article.imageUrl}" alt="Photographie d'un canapé"></div>
 <div class="cart__item__content">
   <div class="cart__item__content__description">
-    <h2>${articles.name}</h2>
-    <p>${articles.color}</p>
+    <h2>${article.name}</h2>
+    <p>${article.color}</p>
     <p>${articlePrice} €</p>
   </div>
   <div class="cart__item__content__settings">
     <div class="cart__item__content__settings__quantity">
       <p>Qté : </p>
-      <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${articles.quantity}">
+      <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${article.quantity}">
     </div>
     <div class="cart__item__content__settings__delete"><p class="deleteItem">Supprimer</p></div>
   </div>
@@ -135,15 +134,57 @@ function textDisplay(articles) {
 
 //----------------------------------------------------------
 // AFFICHAGE DES ARTICLES COMMANDÉS + CALCUL TOTAL 
-let index = 0;
-articleSort(articles);                //classe les articles par ordre alphabétique
-updateCart(articles);               // met à jour le local Storage par ordre alpha
-articles.forEach(function () {
-  textDisplay(articles[index]);
-  totalPriceAndQuantity(articles[index]);
-  index++
-})
 
+function refreshCart() {
+  cartItems.innerHTML = ""
+  totalArticlesPrice = 0;
+  totalArticlesQuantity = 0;
+
+  if (articles != "") {
+    articles = getCart();
+    articleSort(articles);                //rassemble les articles par nom et par couleur
+    updateCart(articles);
+
+    articles.forEach(function (article) {
+      textDisplay(article);
+      totalPriceAndQuantity(article);   // Comment faire pour mettre à blanc le prix quand le dernier élémént est supprimé?
+    })
+  }
+  // ;----------------------------------------------------------
+  //EVENT LISTENER SUR LE CHANGEMENT DE QUANTITÉ
+
+  let changeQuantity = document.querySelectorAll(".itemQuantity")
+  for (let i = 0; i < changeQuantity.length; i++) {
+
+    changeQuantity[i].addEventListener("change", function () {
+
+      articles[i].quantity = Number(changeQuantity[i].value)
+
+      if (articles[i].quantity < 0 || articles[i].quantity > 100) {
+        alert("Vous devez saisir une quantité entre 1 et 100")
+        articles[i].quantity = 0;
+      }
+      updateCart(articles)
+      refreshCart()
+    })
+
+  }
+  // ;----------------------------------------------------------
+  //EVENT LISTENER SUR LE CLICK DU BOUTON SUPPRIMER
+  const removeArticle = document.querySelectorAll(".deleteItem");
+  for (let i = 0; i < removeArticle.length; i++) {
+    removeArticle[i].addEventListener("click", function () {
+
+      if (confirm("Êtes-vous sûr de vouloir supprimer?")) {
+        localStorage.setItem('itemList', JSON.stringify(i)); // On crée une clé dans le Local pour sauvegarder l'index à supprimer
+        removeFromCart(articles)
+      }
+      refreshCart()
+    })
+  }
+}
+
+refreshCart()
 
 //       -----------------> Gestion du LocalStorage <-------------------
 
@@ -160,31 +201,15 @@ function updateCart(articles) {
 
 function getCart() {
   let articles = localStorage.getItem("article");
-  if (articles == null) {
-    return [];
+  // console.log("on GET dans le cart")
+  if (articles == null || articles == "") {
+    // console.log("on passe dans le nul")
+    return "[]";
   }
   else {
+    // console.log("il y a quelque chose dans le local")
     return JSON.parse(articles);
   }
-}
-
-// ;----------------------------------------------------------
-//EVENT LISTENER SUR LE CLICK DU BOUTON SUPPRIMER
-
-const removeArticle = document.querySelectorAll(".deleteItem");
-
-for (let i = 0; i < removeArticle.length; i++) {
-  removeArticle[i].addEventListener("click", function () {
-
-    let articles = getCart();
-
-    if (confirm("Êtes-vous sûr de vouloir supprimer?")) {
-      localStorage.setItem('itemList', JSON.stringify(i)); // On crée une clé dans le Local pour sauvegarder l'index à supprimer
-      removeFromCart(articles)
-    }
-
-    location.reload()
-  })
 }
 
 // ;----------------------------------------------------------
@@ -198,31 +223,15 @@ function removeFromCart(articles) {
   updateCart(articles);
 
   localStorage.removeItem("itemList")
+  // console.log("un article a été supprimé")
 
   if (articles == "") {
     localStorage.removeItem("article")
+    // console.log("il n'y a plus d'articles")
+    cartPrice.style.display = "none"
+    //textDisplay(articles);
+    // totalPriceAndQuantity(0);
   }
-}
-
-// ;----------------------------------------------------------
-//EVENT LISTENER SUR LE CHANGEMENT DE QUANTITÉ
-
-const changeQuantity = document.querySelectorAll(".itemQuantity")
-for (let i = 0; i < changeQuantity.length; i++) {
-
-  changeQuantity[i].addEventListener("change", function () {
-    let articles = getCart();
-    articles[i].quantity = Number(changeQuantity[i].value)
-
-    if (articles[i].quantity < 0 || articles[i].quantity > 100) {
-      alert("Vous devez saisir une quantité entre 1 et 100")
-      articles[i].quantity = 0;
-    }
-    updateCart(articles)
-    //totalPriceAndQuantity(articles[i])
-    location.reload()
-  })
-
 }
 
 
@@ -248,7 +257,7 @@ orderBtn.addEventListener('click', function (element) {
   function firstNameCheck() {
 
     let inputFirstName = document.querySelector("#firstName");
-    if (formValidity(inputFirstName.value)) {
+    if (stringValidity(inputFirstName.value)) {
       inputFirstName.style.border = "solid 2px green";
       document.querySelector("#firstNameErrorMsg").textContent = "";
       return true;
@@ -267,7 +276,7 @@ orderBtn.addEventListener('click', function (element) {
   function lastNameCheck() {
 
     let inputLastName = document.querySelector("#lastName");
-    if (formValidity(inputLastName.value)) {
+    if (stringValidity(inputLastName.value)) {
       inputLastName.style.border = "solid 2px green";
       document.querySelector("#lastNameErrorMsg").textContent = "";
       return true;
@@ -307,7 +316,7 @@ orderBtn.addEventListener('click', function (element) {
   function cityCheck() {
 
     let inputCity = document.querySelector("#city");
-    if (formValidity(inputCity.value)) {
+    if (stringValidity(inputCity.value)) {
       inputCity.style.border = "solid 2px green";
       document.querySelector("#cityErrorMsg").textContent = "";
       return true;
@@ -341,10 +350,11 @@ orderBtn.addEventListener('click', function (element) {
 
   }
   // event.preventDefault();?
+  
   // // ------------------------------------------------------------
   // CONTRÔLE VALIDITÉ AVANT ENVOI SUR LE LOCAL STORAGE : 
-  if (firstNameCheck() && lastNameCheck() && addressCheck() && cityCheck() && emailCheck()) {
-
+  if (firstNameCheck() && lastNameCheck() && addressCheck() && cityCheck() && emailCheck()) { // Gérer le cas où la commande est validée à blanc
+    
     localStorage.setItem("contact", JSON.stringify(contact));
     sendFromToServer();
   }
@@ -352,14 +362,14 @@ orderBtn.addEventListener('click', function (element) {
     alert("Veuillez complétez tous les champs du formulaire")
   }
 
-  // // ------------------------------------------------------------
-  // MÉTHODE POST POUR ENVOYER LA COMMANDE ET LE FORMULAIRE 
+  //   // // ------------------------------------------------------------
+  //   // MÉTHODE POST POUR ENVOYER LA COMMANDE ET LE FORMULAIRE 
 
   const orderId = "";
 
   function sendFromToServer() {
 
-    const promiseOrder = fetch("http://localhost:3000/api/products/order", {
+    const product = fetch("http://localhost:3000/api/products/order", {
       method: "POST",
       body: JSON.stringify({ contact, articles }),
       headers: {
@@ -367,26 +377,20 @@ orderBtn.addEventListener('click', function (element) {
       },
     })
 
-    promiseOrder.then(async (response) => {
-      try {
-        const contenu = await response.json()
-        console.log("contenu", contenu);
-      } catch (error) {
-        console.log(error)
-      }
-    })
+      // Ensuite on stock la réponse de l'api (orderId) :
+      .then((response) => {
+        return response.json();
+      })
 
-    .then((data) => {
-      orderId = data.orderId;
+      .then((server) => {
+        //orderId = server.orderId;
+        console.log(server.id)
 
-      if (orderId != "") {
+        // if (orderId != "") {
         alert("Votre commande a bien été prise en compte");
-        console.log("contact", contact);
-        console.log("articles", articles);
-        console.log("contenu", contenu);
-        console.log("data", data);
-        location.href = "confirmation.html?id=" + orderId;
-      }
-    })
+        //location.href = "confirmation.html?id=" + orderId;
+        // }
+      })
   }
-})    //fin du listener COMMANDER
+})//fin du listener COMMANDER
+

@@ -91,9 +91,9 @@ function getCart(){
 }
 
 // ;----------------------------------------------------------
-//CHECK SI LE PRODUIT EXISTE DEJA DANS LE STORAGE
+//AJOUTE LE PRODUIT DANS LE STORAGE ET VÉRIFIE SI LE PRODUIT EXISTE DEJA 
 
-function checkProductStorage(product){
+function addProductStorage(product){
     let article = getCart();
     let foundProduct = article.find(function(element){
         return element.id == product.id && element.color == product.color;
@@ -132,7 +132,7 @@ buttonCart.addEventListener("click", function () {
             "quantity": parseInt(quantityInput.value)
         }
 
-        checkProductStorage(productInput);
+        addProductStorage(productInput);
         alert(`Vous avez ajouté ${quantityInput.value} ${product.name} de la couleur ${colorInput.value} dans votre panier`);
 
         quantityInput.value = 0;    
