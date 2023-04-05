@@ -142,14 +142,15 @@ function refreshCart() {
 
   if (articles != "") {
     articles = getCart();
-    articleSort(articles);                //rassemble les articles par nom et par couleur
+    articleSort(articles);        
     updateCart(articles);
 
     articles.forEach(function (article) {
-      textDisplay(article);
-      totalPriceAndQuantity(article);   // Comment faire pour mettre à blanc le prix quand le dernier élémént est supprimé?
+    textDisplay(article);
+    totalPriceAndQuantity(article); 
     })
   }
+
   // ;----------------------------------------------------------
   //EVENT LISTENER SUR LE CHANGEMENT DE QUANTITÉ
 
@@ -201,13 +202,12 @@ function updateCart(articles) {
 
 function getCart() {
   let articles = localStorage.getItem("article");
-  // console.log("on GET dans le cart")
+
   if (articles == null || articles == "") {
-    // console.log("on passe dans le nul")
     return "[]";
   }
   else {
-    // console.log("il y a quelque chose dans le local")
+
     return JSON.parse(articles);
   }
 }
@@ -223,14 +223,10 @@ function removeFromCart(articles) {
   updateCart(articles);
 
   localStorage.removeItem("itemList")
-  // console.log("un article a été supprimé")
 
   if (articles == "") {
     localStorage.removeItem("article")
-    // console.log("il n'y a plus d'articles")
     cartPrice.style.display = "none"
-    //textDisplay(articles);
-    // totalPriceAndQuantity(0);
   }
 }
 
@@ -349,13 +345,10 @@ orderBtn.addEventListener('click', function (element) {
     }
 
   }
-  // event.preventDefault();?
-  
+
   // // ------------------------------------------------------------
   // CONTRÔLE VALIDITÉ AVANT ENVOI SUR LE LOCAL STORAGE : 
-  if (firstNameCheck() && lastNameCheck() && addressCheck() && cityCheck() && emailCheck()) { // Gérer le cas où la commande est validée à blanc
-    
-    localStorage.setItem("contact", JSON.stringify(contact));
+  if (firstNameCheck() && lastNameCheck() && addressCheck() && cityCheck() && emailCheck()) {
     sendFromToServer();
   }
   else {
@@ -365,32 +358,33 @@ orderBtn.addEventListener('click', function (element) {
   //   // // ------------------------------------------------------------
   //   // MÉTHODE POST POUR ENVOYER LA COMMANDE ET LE FORMULAIRE 
 
-  const orderId = "";
-
   function sendFromToServer() {
+    const articleIds = articles.map(function (article) {
+      return article.id
+    })
+
+    const data = { contact: contact, products: articleIds }
 
     const product = fetch("http://localhost:3000/api/products/order", {
       method: "POST",
-      body: JSON.stringify({ contact, articles }),
+      body: JSON.stringify(data),
       headers: {
         "Content-Type": "application/json",
       },
     })
 
-      // Ensuite on stock la réponse de l'api (orderId) :
-      .then((response) => {
-        return response.json();
-      })
+    .then((response) => {
+      return response.json();
+    })
 
-      .then((server) => {
-        //orderId = server.orderId;
-        console.log(server.id)
+    .then((response) => {
+      let orderId = response.orderId;
 
-        // if (orderId != "") {
-        alert("Votre commande a bien été prise en compte");
-        //location.href = "confirmation.html?id=" + orderId;
-        // }
-      })
+      if (orderId != "") {
+      alert("Votre commande a bien été prise en compte");
+      location.href = "confirmation.html?id=" + orderId;
+      }
+    })
   }
 })//fin du listener COMMANDER
 
